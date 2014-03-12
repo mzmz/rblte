@@ -1,4 +1,4 @@
-require_relative 'lte_log_analyzer'
+require_relative 'log_analyzer'
 
 describe LteLogAnalyzer, 'default' do
   before :all do

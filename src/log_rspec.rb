@@ -1,8 +1,13 @@
-require_relative 'lte_log'
+require_relative 'log'
 
-describe LteLog, 'default' do
+describe Log, 'default' do
   before :all do
-    @lteLog = LteLog.new
+    @log = Log.new
+  end
+  
+  it "parse the log file to raw items" do 
+  	@log.rawi.should be_a(Array)
+  	pp @log.rawi.size.should equal(4)
   end
   
   it "includes message definitions set" do
@@ -21,11 +26,9 @@ describe LteLog, 'default' do
   it "travels backword"
   	
   	
-    it "should browse a message interactively" do
+  it "should browse a message interactively" do
   end
-  
-   do
-  end
+
   
   it "should classify and merge all messages" do
   	msg_types = @lteLog.abstract.msg_types
@@ -44,9 +47,9 @@ describe LteLog, 'default' do
   
 end
 
-describe LteLogAnalyzer, 'logs' do
+describe Log, 'logs' do
 	it "gets log items from a log file" do
-		lteLog = 
-  	refute_empty()
+		#lteLog = 
+  	#refute_empty()
   end
 end

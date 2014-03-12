@@ -1,5 +1,5 @@
 
-require_relative 'lte_log_item'
+require_relative 'log_item'
 
 describe LteMessage do
   before :each do

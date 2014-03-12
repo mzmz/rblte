@@ -1,5 +1,5 @@
-require_relative 'lte_log'
-require 'pp'
+require_relative 'log'
+
 
 class LteLogAnalyzer
 	attr_reader :mark, :msgs, :proc
