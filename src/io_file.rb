@@ -24,4 +24,31 @@ module IoFile
 		end
 	end
 	
+	
+	def embed(item, ary)
+    dc = {}
+    en = []
+    while !item.empty? do 
+      rl = item.shift
+      l = rl.split.join(' ')
+      l.sub!(/--.*/, '')     #delete the comment
+      
+      if l =~ /^}/    
+        return ary << dc << en
+      elsif l =~ /([\w\-]+)\s(.*)\s{$/		#online "{"
+        ary << {$1 => [$2]}
+        #p $1 + '=======>>>>>' + $2
+        cursor  = ary.last[$1]
+        embed(item, cursor)
+      elsif    (al = l.split(/\s,\s/)).length > 2       #ENUMERATED
+        en = en | al
+      elsif /\s+([\w\-]+),*$/.match(l)    #a name-type pair
+        name = $`
+        type = $1
+        dc[name] = type        
+      end
+    end
+  end
+		
+	
 end

@@ -16,7 +16,7 @@ DRB-Identity ::=					INTEGER (1..32)
 -------------------------------------->
 amsg_hash = 
 	{
-		DRB-CountMSB-InfoList => 		[	SEQUENCE (SIZE (1..maxDRB)) [	DRB-CountMSB-Info => SEQUENCE	]	]
+		DRB-CountMSB-InfoList => 		[	SEQUENCE (SIZE (1..maxDRB)) =>	[DRB-CountMSB-Info	REF] ]
 		DRB-CountMSB-Info => [	SEQUENCE
 			[	drb-Identity =>	[	DRB-Identity	=> INTEGER (1..32)	]
 				countMSB-Uplink	=>	INTEGER(0..33554431)
@@ -53,5 +53,55 @@ MSG_DEF_EXAMPLE
       end
     end
 	end
+	
+	
+	
+  def items2mtc(items)
+    mtc = {}
+
+    items.each do |item|
+      #name TYPE {content}, 
+      #a_msg = {name => [TYPE, [en], {dc}]}
+      p head = item.shift
+      if  head =~ /::=/
+        p 'name  ' + name = $`.strip
+        p 'type  ' + type = $'.split.join(' ')
+
+        if type.include?('{')
+          mtc[name] = [type, ary1 = embed(item, ary1=[])]
+        else
+          mtc[name] = type
+        end
+      end
+    end
+    pp '--------mtc------------'    
+    pp 
+    mtc
+  end
+  
+  def embed(item, ary)
+    dc = {}
+    en = []
+    while !item.empty? do 
+      rl = item.shift
+      l = rl.split.join(' ')
+      l.sub!(/--.*/, '')     #delete the comment
+      
+      if l =~ /^}/    
+        return ary << dc << en
+      elsif l =~ /([\w\-]+)\s(.*)\s{$/
+        ary << {$1 => [$2]}
+        #p $1 + '=======>>>>>' + $2
+        cursor  = ary.last[$1]
+        embed(item, cursor)
+      elsif    (al = l.split(/\s,\s/)).length > 2       #ENUMERATED
+        en = en | al
+      elsif /\s+([\w\-]+),*$/.match(l)    #a name-type pair
+        name = $`
+        type = $1
+        dc[name] = type        
+      end
+    end
+  end
 		
 end
