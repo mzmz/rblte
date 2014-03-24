@@ -1,5 +1,6 @@
 class LogItem
-	
+
+
 <<-LOG_ITEM_EXAMPLE
 2013 Jul 11  13:47:37.941  [00]  0xB0C0  LTE RRC OTA Packet  --  UL_CCCH
 Pkt Version = 2
@@ -42,17 +43,39 @@ UL-CCCH-Message =>
 }
 LOG_ITEM_EXAMPLE
 
+
+attr_reader :hd, :ah
+def initialize(loaf)
+	loaf_head(loaf)
+	if @hd['cmt'].include?('RRC')
+		@alog = loaf_brlog(loaf) 
+	else
+		@alog = loaf_idtlog(loaf)
+	end
+end
+def loaf_head(loaf)
+	@hd = {}
+	while li=loaf.shift do 
+      if /(.*)\[00\]\s*(0x\w{4})\s(.*)--\s*(.*)/.match(li)    
+        @hd = { 'time' => DateTime.parse($1), 'qxdm_id' => $2, 'cmt' => $3.strip, 'cmt1' =>$4 }
+	    elsif /^([\w\. ]+)\s*=\s*(.+)$/.match(li)
+				@hd[$1] = $2
+			else
+				loaf.unshift(li) if /^[-\w]+$/.match(li)
+				return 
+			end
+	end
+end
+
 #parse an rrc log item
 def loaf_brlog(loaf)
-	ah = {}
+	@ah = {}
 	while li=loaf.shift# do |li| 
 		if /([\w\-]+)\s*:(:=)?\s*$/.match(li)	# the structure starts from like "name :"
 			ky = $1
 		end
 		if li.include?('{')													
-			ah[ky] = em_ah(loaf)
-			p "******"
-			pp ah
+			@ah[ky] = em_ah(loaf)
 		end
 	end
 end
@@ -72,15 +95,6 @@ def em_ah(loaf)
 			return bh
 		end
 	end
-end
-
-
-def initialize(loaf, type)
-	p @type = type.upcase
-
-
-	p '^^^^^^^^^^^^^^^'
-	pp @alog = loaf_brlog(loaf) 
 end
 =begin
 <<-COMMET				
@@ -144,34 +158,29 @@ lte_emm_msg	=> {
 }  
 LOG_ITEM_NAS
 	def loaf_idtlog(loaf)   
-		ah = {}
+		@ah = {}
 		idt0 = idt = 0
 		while li = loaf.shift do
 			if /^(\s*)(\w+)\s*$/.match(li)
 				idt = $1.size
-				ah[ky = $2] = nil
-				p "#{idt0}->#{idt}: " + li
 				idt0 = idt
-				#if idt > idt0
-					ah[ky] = em_idtlog(loaf, idt0)
-				#end
+				@ah[ky = $2] = em_idtlog(loaf, idt0)
 			end
 		end
-		pp ah
 	end
 
 	def em_idtlog(loaf, idt0)
 		bh = {}
 		while li = loaf.shift do 				
-			p li + '---------------------------'
+			#p li + '---------------------------'
 			if /^(\s*)(\w+)\s*$/.match(li)			
-				p idt = $1.size		
+				idt = $1.size		
 				bh[ky = $2] = em_idtlog(loaf, idt)			
 			elsif /^(\s*)(\w+)\s*=\s*(.*)\s*/.match(li)
 				idt = $1.size
 				bh[ky = $2] = $3
 			else
-					pp bh
+				#	pp bh
 				return bh			
 			end
 
