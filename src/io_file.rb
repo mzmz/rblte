@@ -13,7 +13,7 @@ module IoFile
 					item = []
 				end
 				#yield fline if block_given?
-				fline.gsub!(/--.*/,'')
+				#fline.gsub!(/--.*/,'')		#omit comment in asn file
 				mli = fline.split(/[,\|]/)
 				mli.each do |li|
 					li.strip!

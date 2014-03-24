@@ -44,57 +44,96 @@ UL-CCCH-Message =>
 LOG_ITEM_EXAMPLE
 
 
-attr_reader :hd, :ah
+attr_reader :hd, :ah, :ax
 def initialize(loaf)
-	loaf_head(loaf)
-	if @hd['cmt'].include?('RRC')
-		@alog = loaf_brlog(loaf) 
+	#pp 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	#pp loaf
+	hd = loaf_head(loaf)
+	if hd.empty?
+		return nil
 	else
-		@alog = loaf_idtlog(loaf)
+		@hd = hd
+		if @hd['cmt'].include?('RRC')
+			loaf_brlog(loaf) 
+		elsif @hd['cmt'].include?('NAS')
+			loaf_idtlog(loaf)
+		else		#
+			p '-----------------------------------------'
+			#@alog = nil
+		end
+
+		#pp hd
+		#pp @ah
+		@ax = flat(ah)
 	end
 end
-def loaf_head(loaf)
-	@hd = {}
-	while li=loaf.shift do 
-      if /(.*)\[00\]\s*(0x\w{4})\s(.*)--\s*(.*)/.match(li)    
-        @hd = { 'time' => DateTime.parse($1), 'qxdm_id' => $2, 'cmt' => $3.strip, 'cmt1' =>$4 }
-	    elsif /^([\w\. ]+)\s*=\s*(.+)$/.match(li)
-				@hd[$1] = $2
-			else
-				loaf.unshift(li) if /^[-\w]+$/.match(li)
-				return 
-			end
+
+def flat(ah)
+	ax = []
+	ah.keys.each do |ky| 
+		#p '.' + ky
+		v = ah[ky]
+		if v.is_a?(Hash)		
+			#p 'x'
+			ax << ky
+			#p 
+			ax << flat(v)
+		end
 	end
+	ax.flatten
+end
+
+def loaf_head(loaf)
+	hd = {}
+	while li=loaf.shift do 
+		#p 'li---' + li
+    if /(.*)\[00\]\s*(0x\w{4})\s*LTE(.*)--\s*(.*)/.match(li)    
+      hd = { 'time' => DateTime.parse($1), 'qxdm_id' => $2, 'cmt' => $3.strip, 'cmt1' =>$4 }
+    elsif /^([\w\. ]+)\s*=\s*(.+)$/.match(li)
+			hd[$1.strip] = $2
+		else
+			loaf.unshift(li) if /^[-\w]+$/.match(li)
+			return hd 
+		end
+	end
+	hd
 end
 
 #parse an rrc log item
 def loaf_brlog(loaf)
+	#pp loaf
 	@ah = {}
 	while li=loaf.shift# do |li| 
+		#p li + '---------------------------1'
 		if /([\w\-]+)\s*:(:=)?\s*$/.match(li)	# the structure starts from like "name :"
 			ky = $1
 		end
 		if li.include?('{')													
+			#pp 
 			@ah[ky] = em_ah(loaf)
 		end
-	end
+	end	
 end
 def em_ah(loaf)
 	bh = {}
 	while	li = loaf.shift 
-		if /([\w\-]+)\s*:(:=)?\s*$/.match(li)	
-			ky = $1
+		#p li + '---------------------------2'
+		if /([\w\-]+)\s*:(:=)?\s*$/.match(li)	or /^\s*([-\w]+),?\s*$/.match(li)
+			ky = $1			
 		end
-		if li.include?('{')
+		if li.include?('{') #and ky
 			bh[ky] = em_ah(loaf)
 		end
 		if /([\w\-]+)/.match(li)		#TODO: fine the regex
-			bh[$1] = $'.strip
+			bh[$1] = $'.strip #+ '***'
 		end
-		if li.include?('}')
+		if li.include?('}')	
+			#p 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+			#pp bh
 			return bh
 		end
 	end
+
 end
 =begin
 <<-COMMET				
@@ -180,7 +219,7 @@ LOG_ITEM_NAS
 				idt = $1.size
 				bh[ky = $2] = $3
 			else
-				#	pp bh
+				#pp bh
 				return bh			
 			end
 

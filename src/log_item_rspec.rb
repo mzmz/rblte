@@ -59,23 +59,100 @@ lte_emm_msg
       MME_group_id = 416 (0x1a0)
       MME_code = 144 (0x90)
       m_tmsi = 3372550745 (0xc9050a59)'
+'LOG          [0xB0C0]     LTE RRC OTA Message                     17:03:24.338        Length: 0031'
+brrc='2013 Jul 23  17:03:24.339  [00]  0xB0C0  LTE RRC OTA Packet  --  BCCH_DL_SCH
+Pkt Version = 2
+RRC Release Number.Major.minor = 9.10.0
+Radio Bearer ID = 0, Physical Cell ID = 193
+Freq = 38350
+SysFrameNum = 658, SubFrameNum = 5
+PDU Number = BCCH_DL_SCH Message,    Msg Length = 18
 
+Interpreted PDU:
+
+value BCCH-DL-SCH-Message ::= 
+{
+  message c1 : systemInformationBlockType1 : 
+      {
+        cellAccessRelatedInfo 
+        {
+          plmn-IdentityList 
+          {
+            {
+              plmn-Identity 
+              {
+                mcc 
+                {
+                  4,
+                  6,
+                  0
+                },
+                mnc 
+                {
+                  0,
+                  0
+                }
+              },
+              cellReservedForOperatorUse notReserved
+            }
+          },
+          trackingAreaCode \'00000000 00110011\'B,
+          cellIdentity \'11000110 11010010 10100000 0010\'B,
+          cellBarred notBarred,
+          intraFreqReselection allowed,
+          csg-Indication FALSE
+        },
+        cellSelectionInfo 
+        {
+          q-RxLevMin -64
+        },
+        freqBandIndicator 39,
+        schedulingInfoList 
+        {
+          {
+            si-Periodicity rf16,
+            sib-MappingInfo 
+            {
+              sibType3
+            }
+          },
+          {
+            si-Periodicity rf32,
+            sib-MappingInfo 
+            {
+              sibType5
+            }
+          }
+        },
+        tdd-Config 
+        {
+          subframeAssignment sa2,
+          specialSubframePatterns ssp6
+        },
+        si-WindowLength ms40,
+        systemInfoValueTag 1
+      }
+}
+'
 @arrc = arrc.split("\n")
 @anas = anas.split("\n")
+@brrc = brrc.split("\n")
   end
 
   
   it "should map an rrc log item to message" do 
-		log_item = LogItem.new(@arrc)
+		log_item = LogItem.new(@brrc)
 		#assert_kind_of(log_item.hd, Hash)
 		pp log_item.hd
 		pp log_item.ah
+		pp log_item.ax
 	end
 		
 	it "map an nas log item to message" do 
-		log_item = LogItem.new(@anas)
-		pp log_item.hd
-		pp log_item.ah
+		#log_item = LogItem.new(@anas)
+		#pp log_item.hd
+		#pp log_item.ah
+		#pp log_item.ax
 		#assert(true)
 	end
   it "checks fields and values of an item according to the message definition"

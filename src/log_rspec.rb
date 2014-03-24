@@ -2,13 +2,17 @@ require_relative 'log'
 
 describe Log, 'default' do
   before :all do
-    @log = Log.new
+    @log = Log.new('../logs/121log0.txt')
   end
   
   it "parse the log file to raw items" do 
   	@log.rawi.should be_a(Array)
-  	pp @log.rawi.size.should equal(4)
+  	# @log.rawi.size.should equal(4)
   end
+
+	it "includes log items" do
+		pp @log.msg
+	end
   
   it "includes message definitions set" do
   	assert_instance_of(LteSigDef, lteLog.msg_def)
