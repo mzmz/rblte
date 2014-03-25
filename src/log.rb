@@ -18,9 +18,26 @@ class Log
 		
 	end
 
-	def self.get_msg(type)
-		define_method(type) {
-
-		}
+	#extract messages according to the input regex
+	def ex_msg(pt)
+		pt_ary = []
+		@msg.each do |ait|
+			#ax = ait.get_kys(ait.ah)
+			#if ax.include?(pt)
+				#pp	'!' 
+				aex = ait.get_node(ait.ah, pt)
+				if not aex.empty?	
+					aex[0]['time'] = ait.hd['time']
+					pt_ary << aex
+				end
+			#end
+		end
+		pt_ary.flatten
 	end
+
+	#sort according to time
+	def sort(ary)
+		
+	end
+
 end

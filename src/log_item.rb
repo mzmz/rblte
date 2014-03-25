@@ -44,10 +44,10 @@ UL-CCCH-Message =>
 LOG_ITEM_EXAMPLE
 
 
-attr_reader :hd, :ah, :ax
+attr_reader :hd, :ah, :ax		#:hd - log header; ah - message body
+
+#get an message hash from an QXDM log block
 def initialize(loaf)
-	#pp 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-	#pp loaf
 	hd = loaf_head(loaf)
 	if hd.empty?
 		return nil
@@ -61,28 +61,41 @@ def initialize(loaf)
 			p '-----------------------------------------'
 			#@alog = nil
 		end
-
 		#pp hd
 		#pp @ah
-		@ax = flat(ah)
+		#@ax = flat(ah)
 	end
 end
 
-def flat(ah)
+#get the regex pt matching field
+def get_node(ah, pt)
+	a = []
+	ah.keys.each do |ky| 
+		v = ah[ky]
+		if pt.match(ky)		
+			#pp 
+			a << {ky => v} 
+		elsif v.is_a?(Hash)
+			a << get_node(v, pt)
+		end
+	end
+	a.flatten
+end
+
+#extract all field name in a message
+def get_kys(ah)
 	ax = []
 	ah.keys.each do |ky| 
-		#p '.' + ky
 		v = ah[ky]
 		if v.is_a?(Hash)		
-			#p 'x'
 			ax << ky
-			#p 
-			ax << flat(v)
+			ax << get_kys(v)
 		end
 	end
 	ax.flatten
 end
 
+#get the log info
 def loaf_head(loaf)
 	hd = {}
 	while li=loaf.shift do 
@@ -110,11 +123,11 @@ def loaf_brlog(loaf)
 		end
 		if li.include?('{')													
 			#pp 
-			@ah[ky] = em_ah(loaf)
+			@ah[ky] = em_brlog(loaf)
 		end
 	end	
 end
-def em_ah(loaf)
+def em_brlog(loaf)
 	bh = {}
 	while	li = loaf.shift 
 		#p li + '---------------------------2'
@@ -122,7 +135,7 @@ def em_ah(loaf)
 			ky = $1			
 		end
 		if li.include?('{') #and ky
-			bh[ky] = em_ah(loaf)
+			bh[ky] = em_brlog(loaf)
 		end
 		if /([\w\-]+)/.match(li)		#TODO: fine the regex
 			bh[$1] = $'.strip #+ '***'
@@ -196,6 +209,8 @@ lte_emm_msg	=> {
   }
 }  
 LOG_ITEM_NAS
+
+	#parse an nas log
 	def loaf_idtlog(loaf)   
 		@ah = {}
 		idt0 = idt = 0
@@ -227,4 +242,6 @@ LOG_ITEM_NAS
 		end
 		return bh
 	end  
+
+	private :em_idtlog, :em_brlog
 end

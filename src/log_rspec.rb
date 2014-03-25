@@ -11,19 +11,25 @@ describe Log, 'default' do
   end
 
 	it "includes log items" do
-		pp @log.msg
+		@log.msg.size.should equal(307)
+	end
+
+	it "could extract specific messages" do
+		#pp @log.ex_msg("rrcConnectionSetup")
+		#p '-------------------------------'
+		ary = @log.ex_msg(/cellSelectionInfo/)
+		bry = @log.ex_msg(/emm_ta_update_req/)
+		ary.size.should equal(15)
+		bry.size.should equal(5)
+		a = [bry, ary].flatten
+		a.sort! {|x, y| x['time'] <=> y['time']}
+		a.each {|x| pp x['time']}
 	end
   
-  it "includes message definitions set" do
-  	assert_instance_of(LteSigDef, lteLog.msg_def)
+  it "includes message definitions set" do		
+  	#assert_instance_of(LteSigDef, lteLog.msg_def)
   end
   
-  it "contructs a 'nlog' array of messages" do
-  	nlog = @lteLog.nlog
-  	assert_instance_of(Array, nlog)
-  	assert_equal(nlog.size, NLOG)
-  	nlog.map { |msg| assert_instance_of(LteMsg, msg) }
-  end
 
   it "locates a message by id"
   it "travels forword"

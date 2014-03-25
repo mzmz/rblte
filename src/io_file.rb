@@ -24,7 +24,8 @@ module IoFile
 		end
 	end
 	
-	
+	private
+	#TODO move2msgdef
 	def embed(item, ary)
     dc = {}
     en = []

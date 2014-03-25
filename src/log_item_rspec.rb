@@ -155,6 +155,7 @@ value BCCH-DL-SCH-Message ::=
 		#pp log_item.ax
 		#assert(true)
 	end
+
   it "checks fields and values of an item according to the message definition"
   it "diff log item and message definition"
   it ""
