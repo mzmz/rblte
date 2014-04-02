@@ -2,10 +2,16 @@ require_relative 'log_analyzer'
 
 describe LteLogAnalyzer, 'default' do
   before :all do
-    @lteLog = LteLogAnalyzer.new
+    @lteA = LteLogAnalyzer.new('../logs/121log0.txt')
   end
-  it "outputs an abstract"
-  it "lists reject or failure messages"
+  it "outputs an abstract" 	
+	it "static message types in the log" do
+		# pp 
+		@lteA.msg_types
+	end
+  it "lists reject or failure messages" do
+		pp @lteA.filter_rej#(/complete/)
+	end
   it "buffers likeness messages"
   it "shows nas procedures"
   it "shows radio links"
@@ -15,27 +21,27 @@ describe LteLogAnalyzer, 'default' do
 	
 	it "should register" do
 		# online & offline chart
-		@lteLog.nas.esm		#show eps bearers
-		@ltelog.nas.emm		#show tracking area actions
+		@lteA.nas.esm		#show eps bearers
+		@lteA.nas.emm		#show tracking area actions
 	end
 	
 	it "should show rrc idle" do
-		rrc_idle = @lteLog.rrc.idle		#cell selection and reselection
+		rrc_idle = @lteA.rrc.idle		#cell selection and reselection
 	end
 	
 	it "should show rrc connection" do 
-		rrc_conn = @lteLog.rrc.conn
+		rrc_conn = @lteA.rrc.conn
 	end
 	
 	it "should list measurement" do
-		meas = @lteLog.rrc.meas
+		meas = @lteA.rrc.meas
 	end
 
 	it "should irat" do
 	end		
   
   it "should show csfb"	do
-  	@lteLog.csfb
+  	@lteA.csfb
   end
 end
 

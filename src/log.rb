@@ -2,10 +2,22 @@ require_relative 'io_file'
 require_relative 'msg_def'
 require_relative 'log_item'
 
+class Hash
+  def deep_del_nil!
+    self.each_key do |k| 
+			if self[k].is_a?(Hash)
+				self[k].deep_del_nil!
+			end
+		end		
+		self.delete_if {|k,v| v.empty?}
+  end
+end
+
 class Log
 	include IoFile
 	
 	attr_reader :rawi, :msg
+
 	@@log_line_1 = /(.*)\[00\]\s*(0x\w{4})/
 
 	def initialize(file = '../logs/ex_log')
@@ -31,13 +43,9 @@ class Log
 					pt_ary << aex
 				end
 			#end
-		end
-		pt_ary.flatten
-	end
-
-	#sort according to time
-	def sort(ary)
-		
+		end		
+		pts = $1 if /:(\w+)/.match("#{pt}")
+		pt_ary.flatten!
 	end
 
 end

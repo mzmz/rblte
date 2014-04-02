@@ -1,5 +1,6 @@
-class LogItem
+require 'date'
 
+class LogItem
 
 <<-LOG_ITEM_EXAMPLE
 2013 Jul 11  13:47:37.941  [00]  0xB0C0  LTE RRC OTA Packet  --  UL_CCCH
@@ -63,7 +64,7 @@ def initialize(loaf)
 		end
 		#pp hd
 		#pp @ah
-		#@ax = flat(ah)
+		@ax = get_kys(ah)
 	end
 end
 
